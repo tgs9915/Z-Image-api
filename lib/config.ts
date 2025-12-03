@@ -3,7 +3,8 @@
  * 加载和管理系统配置
  */
 
-// 默认 SOCKS5 代理源（与 Python 源码一致）
+// 默认 SOCKS5 代理源URL（与 Python 源码一致）
+// 这些是指向代理地址列表的URL，不是代理地址本身
 const DEFAULT_PROXY_SOURCES = [
     'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.txt',
     'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt',
@@ -49,7 +50,8 @@ export const config = {
         demoteFailCount: parseInt(process.env.PROXY_DEMOTE_FAIL_COUNT || '3'),
         verifyBeforeUse: process.env.PROXY_VERIFY_BEFORE_USE === 'true', // Default false
         verifyMaxAttempts: parseInt(process.env.PROXY_VERIFY_MAX_ATTEMPTS || '5'),
-        // 代理源列表 - 支持从环境变量配置（逗号或换行符分隔），或使用默认源
+        // 代理源URL列表 - 每个URL指向一个包含代理地址(IP:PORT)的文本文件
+        // 支持从环境变量 PROXY_SOURCES 配置（逗号或换行符分隔），或使用默认的7个代理源URL
         sources: process.env.PROXY_SOURCES
             ? process.env.PROXY_SOURCES.split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean)
             : DEFAULT_PROXY_SOURCES,

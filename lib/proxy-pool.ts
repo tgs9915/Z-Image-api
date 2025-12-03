@@ -67,7 +67,12 @@ function createProxyInfo(proxyUrl: string, pool: 'priority' | 'public'): ProxyIn
 }
 
 /**
- * 从免费代理源拉取代理列表
+ * 从代理源拉取代理地址列表
+ * 
+ * 代理源 (Proxy Source): URL，指向包含代理地址列表的文本文件
+ * 代理地址 (Proxy Address): 具体的代理服务器，格式为 IP:PORT
+ * 
+ * @returns 代理地址数组，例如 ['1.2.3.4:1080', '5.6.7.8:1080']
  */
 export async function fetchProxiesFromSources(): Promise<string[]> {
     const proxies: Set<string> = new Set()
@@ -107,7 +112,7 @@ export async function fetchProxiesFromSources(): Promise<string[]> {
 }
 
 /**
- * 获取可用代理
+ * 获取可用代理（支持自动初始化）
  */
 export async function getProxy(): Promise<ProxyInfo | null> {
     // 优先从优先池获取
@@ -145,6 +150,31 @@ export async function getProxy(): Promise<ProxyInfo | null> {
 
         if (proxy.usesToday < config.proxyPool.maxDailyUses) {
             return proxy
+        }
+    }
+
+    // 如果代理池完全为空，尝试自动初始化（首次使用或池被清空）
+    if (priorityProxies.length === 0 && publicProxies.length === 0) {
+        console.log('代理池为空，正在自动拉取代理...')
+        try {
+            const proxies = await fetchProxiesFromSources()
+            console.log(`自动拉取到 ${proxies.length} 个代理`)
+
+            // 添加到公共池
+            let addedCount = 0
+            for (const proxyUrl of proxies.slice(0, 100)) { // 只添加前100个，避免太慢
+                const added = await addProxy(proxyUrl, false)
+                if (added) addedCount++
+            }
+
+            console.log(`自动初始化：成功添加 ${addedCount} 个代理到公共池`)
+
+            // 递归调用一次来返回代理
+            if (addedCount > 0) {
+                return await getProxy()
+            }
+        } catch (error) {
+            console.error('自动初始化代理池失败:', error)
         }
     }
 
