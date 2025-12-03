@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyApiKey } from '@/lib/auth'
 import { getModels } from '@/lib/kv'
-import { defaultModels, config } from '@/lib/config'
+import { config } from '@/lib/config'
 import { generateImage, getRandomHints } from '@/lib/zimage'
 
 interface Message {
@@ -50,14 +50,14 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // 获取模型配置
-        let models = await getModels()
-        if (Object.keys(models).length === 0) {
-            models = defaultModels
-        }
+        // 获取模型列表
+        const models = await getModels()
+        const modelName = body.model || (models.length > 0 ? models[0].id : 'Z-Image')
 
-        const modelName = body.model && models[body.model] ? body.model : Object.keys(models)[0]
-        const modelConfig = models[modelName]
+        // 使用默认图片配置
+        const height = config.zimage.defaultHeight
+        const width = config.zimage.defaultWidth
+        const steps = config.zimage.defaultSteps
 
         const requestId = `chatcmpl-${Math.random().toString(36).substring(2)}`
         const created = Math.floor(Date.now() / 1000)
@@ -75,9 +75,9 @@ export async function POST(request: NextRequest) {
                         // 开始生成图片（异步）
                         const imagePromise = generateImage(
                             prompt,
-                            modelConfig.height,
-                            modelConfig.width,
-                            modelConfig.steps
+                            height,
+                            width,
+                            steps
                         )
 
                         // 逐个发送提示
@@ -153,9 +153,9 @@ export async function POST(request: NextRequest) {
         // 非流式响应
         const imageUrl = await generateImage(
             prompt,
-            modelConfig.height,
-            modelConfig.width,
-            modelConfig.steps
+            height,
+            width,
+            steps
         )
 
         const content = imageUrl

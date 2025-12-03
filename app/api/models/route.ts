@@ -6,7 +6,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyConsoleAuth } from '@/lib/auth'
 import { getModels } from '@/lib/kv'
-import { defaultModels } from '@/lib/config'
 
 export async function GET(request: NextRequest) {
     if (!verifyConsoleAuth(request)) {
@@ -16,15 +15,10 @@ export async function GET(request: NextRequest) {
         )
     }
 
-    let models = await getModels()
-
-    // 如果没有模型，初始化默认模型
-    if (Object.keys(models).length === 0) {
-        models = defaultModels
-    }
+    const models = await getModels()
 
     return NextResponse.json({
-        models,
-        total: Object.keys(models).length
+        object: 'list',
+        data: models,
     })
 }
