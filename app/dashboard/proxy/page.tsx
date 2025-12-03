@@ -149,6 +149,34 @@ export default function ProxyManagementPage() {
         }
     }
 
+    const handleUpdateProxies = async () => {
+        if (!confirm('这将从配置的代理源拉取最新的代理地址。可能需要一些时间。确认继续吗?')) return
+
+        const token = localStorage.getItem('console_token')
+        if (!token) return
+
+        setOperating(true)
+        try {
+            const response = await fetch('/api/proxy/update', {
+                method: 'POST',
+                headers: { 'X-Console-Token': token },
+            })
+
+            if (response.ok) {
+                const data = await response.json()
+                alert(`拉取完成！\n新增代理: ${data.new_count} 个`)
+                loadProxies()
+            } else {
+                alert('拉取代理失败')
+            }
+        } catch (error) {
+            console.error('拉取代理失败:', error)
+            alert('拉取代理失败')
+        } finally {
+            setOperating(false)
+        }
+    }
+
     const handleClearProxies = async (pool?: string) => {
         const poolName = pool === 'priority' ? '优先池' : pool === 'public' ? '公共池' : '所有代理池'
         if (!confirm(`确认清空${poolName}吗？此操作不可恢复！`)) return
@@ -205,6 +233,14 @@ export default function ProxyManagementPage() {
                         <h1 className="dashboard-title gradient-text">代理池管理</h1>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <button
+                                className="btn btn-primary"
+                                onClick={handleUpdateProxies}
+                                disabled={operating}
+                                title="从配置的代理源URL拉取代理地址"
+                            >
+                                {operating ? '拉取中...' : '🔄 从代理源拉取'}
+                            </button>
+                            <button
                                 className="btn btn-secondary"
                                 onClick={handleCheckProxies}
                                 disabled={operating}
@@ -223,7 +259,10 @@ export default function ProxyManagementPage() {
                 <div className="container">
                     {/* 添加代理 */}
                     <div className="card" style={{ marginBottom: '2rem' }}>
-                        <h2 className="stat-title">添加代理</h2>
+                        <h2 className="stat-title">手动添加代理地址</h2>
+                        <p style={{ color: 'var(--text-gray)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                            💡 这里添加的是单个代理地址（IP:PORT），不是代理源URL。如需从代理源拉取，请点击上方"从代理源拉取"按钮。
+                        </p>
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                             <input
                                 type="text"

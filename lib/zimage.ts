@@ -167,7 +167,7 @@ async function doGenerate(
 
         // 标记代理成功
         if (proxyInfo) {
-            const elapsed = (Date.now() - startTime) / 1000
+            const elapsed = Date.now() - startTime // 使用毫秒
             await markProxySuccess(proxyInfo, elapsed)
         }
 
