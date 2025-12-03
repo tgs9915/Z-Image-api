@@ -4,6 +4,7 @@
  */
 
 import { kv } from '@vercel/kv'
+import { config, defaultModels } from './config'
 
 // KV 键前缀
 const KEYS = {
@@ -87,6 +88,9 @@ export interface ModelInfo {
     name?: string
     description?: string
     max_tokens?: number
+    height?: number
+    width?: number
+    steps?: number
 }
 
 /**
@@ -97,15 +101,19 @@ export async function getModels(): Promise<ModelInfo[]> {
         const data = await kv.get<ModelInfo[]>(KEYS.MODELS)
         if (!data || data.length === 0) {
             // 返回默认模型
-            return [{
-                id: 'Z-Image',
+            // 返回默认模型
+            return Object.entries(defaultModels).map(([id, config]) => ({
+                id: id,
                 object: 'model',
                 created: Math.floor(Date.now() / 1000),
                 owned_by: 'z-image',
-                name: 'Z-Image 默认模型',
-                description: '基于 FLUX.1-schnell 的快速图像生成模型',
+                name: config.name,
+                description: config.description,
+                height: config.height,
+                width: config.width,
+                steps: config.steps,
                 max_tokens: 4096,
-            }]
+            }))
         }
         return data
     } catch (error) {
@@ -141,6 +149,15 @@ export interface Settings {
 export async function getSettings(): Promise<Settings | null> {
     try {
         const data = await kv.get<Settings>(KEYS.SETTINGS)
+        if (!data) {
+            return {
+                baseUrl: config.baseUrl,
+                maxDailyUses: config.proxyPool.maxDailyUses,
+                updateInterval: config.proxyPool.updateInterval,
+                verifyBeforeUse: config.proxyPool.verifyBeforeUse,
+                verifyMaxAttempts: config.proxyPool.verifyMaxAttempts,
+            }
+        }
         return data
     } catch (error) {
         console.error('获取系统设置失败:', error)

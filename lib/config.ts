@@ -36,11 +36,16 @@ export const config = {
         healthCheckInterval: parseInt(process.env.PROXY_HEALTH_CHECK_INTERVAL || '120'),
         promoteThreshold: parseFloat(process.env.PROXY_PROMOTE_THRESHOLD || '5.0'),
         demoteFailCount: parseInt(process.env.PROXY_DEMOTE_FAIL_COUNT || '3'),
+        verifyBeforeUse: process.env.PROXY_VERIFY_BEFORE_USE === 'true', // Default false
+        verifyMaxAttempts: parseInt(process.env.PROXY_VERIFY_MAX_ATTEMPTS || '5'),
         sources: [
             'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.txt',
             'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt',
             'https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks5.txt',
             'https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt',
+            'https://sockslist.us/Raw',
+            'https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt',
+            'https://vakhov.github.io/fresh-proxy-list/socks5.txt',
         ],
     },
 

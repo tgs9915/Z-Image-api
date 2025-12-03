@@ -53,11 +53,12 @@ export async function POST(request: NextRequest) {
         // 获取模型列表
         const models = await getModels()
         const modelName = body.model || (models.length > 0 ? models[0].id : 'Z-Image')
+        const selectedModel = models.find(m => m.id === modelName)
 
-        // 使用默认图片配置
-        const height = config.zimage.defaultHeight
-        const width = config.zimage.defaultWidth
-        const steps = config.zimage.defaultSteps
+        // 使用模型配置或默认配置
+        const height = selectedModel?.height || config.zimage.defaultHeight
+        const width = selectedModel?.width || config.zimage.defaultWidth
+        const steps = selectedModel?.steps || config.zimage.defaultSteps
 
         const requestId = `chatcmpl-${Math.random().toString(36).substring(2)}`
         const created = Math.floor(Date.now() / 1000)
