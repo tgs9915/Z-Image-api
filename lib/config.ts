@@ -3,6 +3,17 @@
  * 加载和管理系统配置
  */
 
+// 默认 SOCKS5 代理源（与 Python 源码一致）
+const DEFAULT_PROXY_SOURCES = [
+    'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.txt',
+    'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt',
+    'https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks5.txt',
+    'https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt',
+    'https://sockslist.us/Raw',
+    'https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt',
+    'https://vakhov.github.io/fresh-proxy-list/socks5.txt',
+]
+
 // 服务器配置
 export const config = {
     // Z-Image API
@@ -38,15 +49,10 @@ export const config = {
         demoteFailCount: parseInt(process.env.PROXY_DEMOTE_FAIL_COUNT || '3'),
         verifyBeforeUse: process.env.PROXY_VERIFY_BEFORE_USE === 'true', // Default false
         verifyMaxAttempts: parseInt(process.env.PROXY_VERIFY_MAX_ATTEMPTS || '5'),
-        sources: [
-            'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.txt',
-            'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt',
-            'https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks5.txt',
-            'https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt',
-            'https://sockslist.us/Raw',
-            'https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt',
-            'https://vakhov.github.io/fresh-proxy-list/socks5.txt',
-        ],
+        // 代理源列表 - 支持从环境变量配置（逗号或换行符分隔），或使用默认源
+        sources: process.env.PROXY_SOURCES
+            ? process.env.PROXY_SOURCES.split(/[,\n]/).map((s: string) => s.trim()).filter(Boolean)
+            : DEFAULT_PROXY_SOURCES,
     },
 
     // 存储
