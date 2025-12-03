@@ -80,6 +80,16 @@ export function verifyConsoleAuth(request: NextRequest): boolean {
 }
 
 /**
+ * 验证控制台 Token (字符串形式)
+ */
+export function verifyConsoleToken(token: string | null): boolean {
+    if (!token) return false
+    const payload = verifyToken(token)
+    return payload !== null
+}
+
+
+/**
  * 验证 API 密钥
  */
 export function verifyApiKey(request: NextRequest): boolean {

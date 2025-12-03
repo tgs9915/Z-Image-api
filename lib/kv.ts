@@ -79,32 +79,45 @@ export async function savePublicProxies(proxies: ProxyInfo[]): Promise<void> {
 
 // ==================== 模型配置存储 ====================
 
-export interface ModelConfig {
-    name: string
-    height: number
-    width: number
-    steps: number
-    description: string
-    isDefault: boolean
+export interface ModelInfo {
+    id: string
+    object: string
+    created: number
+    owned_by: string
+    name?: string
+    description?: string
+    max_tokens?: number
 }
 
 /**
  * 获取所有模型配置
  */
-export async function getModels(): Promise<Record<string, ModelConfig>> {
+export async function getModels(): Promise<ModelInfo[]> {
     try {
-        const data = await kv.get<Record<string, ModelConfig>>(KEYS.MODELS)
-        return data || {}
+        const data = await kv.get<ModelInfo[]>(KEYS.MODELS)
+        if (!data || data.length === 0) {
+            // 返回默认模型
+            return [{
+                id: 'Z-Image',
+                object: 'model',
+                created: Math.floor(Date.now() / 1000),
+                owned_by: 'z-image',
+                name: 'Z-Image 默认模型',
+                description: '基于 FLUX.1-schnell 的快速图像生成模型',
+                max_tokens: 4096,
+            }]
+        }
+        return data
     } catch (error) {
         console.error('获取模型配置失败:', error)
-        return {}
+        return []
     }
 }
 
 /**
  * 保存模型配置
  */
-export async function saveModels(models: Record<string, ModelConfig>): Promise<void> {
+export async function saveModels(models: ModelInfo[]): Promise<void> {
     try {
         await kv.set(KEYS.MODELS, models)
     } catch (error) {
